@@ -128,6 +128,8 @@ Mappings:
         reponame: staging
     production:
         reponame: production
+    drain:
+        reponame: drain-vs-evacuate
 
 Resources:
 
