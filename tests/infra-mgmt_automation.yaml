@@ -357,7 +357,7 @@
         - maintenance
 
     - name: Drain node03
-      command: oc adm drain node03.internal.aws.testdrive.openshift.com --ignore-daemonsets=true
+      command: oc adm drain node03.internal.aws.testdrive.openshift.com --ignore-daemonsets=true --delete-local-data
       tags:
         - maintenance
 
