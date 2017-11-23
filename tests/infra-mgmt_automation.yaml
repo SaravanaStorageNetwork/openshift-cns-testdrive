@@ -356,8 +356,8 @@
       tags:
         - maintenance
 
-    - name: Evacuate node03
-      command: oc adm manage-node node03.internal.aws.testdrive.openshift.com --evacuate
+    - name: Drain node03
+      command: oc adm drain node03.internal.aws.testdrive.openshift.com --ignore-daemonsets=true
       tags:
         - maintenance
 
