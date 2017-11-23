@@ -131,6 +131,29 @@ Mappings:
 
 Resources:
 
+  AccessECRRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      RoleName: AccessECR
+
+  AccessECRProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - Ref: AccessECRRole
+
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -440,7 +463,6 @@ Resources:
         ToPort: 65535
         CidrIp: 0.0.0.0/0
 
-
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -709,6 +731,8 @@ Resources:
   Master1:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1139,10 +1163,11 @@ Resources:
               - [ /dev/xvdc, /var/lib/etcd, xfs, "defaults" ]
             - { RepoBranch: !FindInMap [ RepoBranches, !Ref QwiklabId, reponame] }
 
-
   InfraNode1:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1385,6 +1410,8 @@ Resources:
   WorkerNode1:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1466,6 +1493,8 @@ Resources:
   WorkerNode2:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1547,6 +1576,8 @@ Resources:
   WorkerNode3:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1628,6 +1659,8 @@ Resources:
   WorkerNode4:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1714,6 +1747,8 @@ Resources:
   WorkerNode5:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
@@ -1800,6 +1835,8 @@ Resources:
   WorkerNode6:
     Type: AWS::EC2::Instance
     Properties:
+      IamInstanceProfile:
+        Ref: AccessECRProfile
       ImageId:
         Fn::FindInMap:
         - AWSRegion2AMI
