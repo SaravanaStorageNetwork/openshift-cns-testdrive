@@ -702,8 +702,6 @@ Resources:
 
   Master1:
     Type: AWS::EC2::Instance
-    DependsOn:
-      -
     Properties:
       ImageId:
         Fn::FindInMap:
