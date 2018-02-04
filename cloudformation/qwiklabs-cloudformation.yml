@@ -692,13 +692,18 @@ Resources:
 
   WaitCondition:
     Type: AWS::CloudFormation::WaitCondition
-    DependsOn: GuideNode
+    DependsOn:
+      - GuideNode
+      - Master1
     Properties:
       Handle: !Ref WaitHandle
-      Timeout: '600'
+      Timeout: '1800'
+      Count: '2'
 
   Master1:
     Type: AWS::EC2::Instance
+    DependsOn:
+      -
     Properties:
       ImageId:
         Fn::FindInMap:
@@ -769,15 +774,6 @@ Resources:
               system_info:
                 default_user:
                   name: cloud-user
-
-              runcmd:
-              - ansible-playbook /opt/lab/helpers/fetch_idm_cert.yml
-              - mkdir -p /var/lib/etcd
-              - git clone -b ${RepoBranch} https://github.com/${RepoAccount}/openshift-cns-testdrive.git /opt/lab/code
-              - chown -R cloud-user:cloud-user /opt/lab
-              - cp /opt/lab/code/support/* /opt/lab/support/
-              - chown -R cloud-user:cloud-user /opt/lab
-              - systemctl start httpd
 
               write_files:
                 - content: |
@@ -1058,6 +1054,25 @@ Resources:
                   path: /opt/lab/support/second-cns-storageclass.yaml
                   owner: cloud-user:cloud-user
 
+              runcmd:
+              - ansible-playbook /opt/lab/helpers/fetch_idm_cert.yml
+              - mkdir -p /var/lib/etcd
+              - git clone -b ${RepoBranch} https://github.com/${RepoAccount}/openshift-cns-testdrive.git /opt/lab/code
+              - chown -R cloud-user:cloud-user /opt/lab
+              - cp /opt/lab/code/support/* /opt/lab/support/
+              - chown -R cloud-user:cloud-user /opt/lab
+              - systemctl start httpd
+              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode1.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode2.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode3.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode4.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode5.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode6.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=22 host=${InfraNode1.PrivateIp}"
+              - ansible localhost -m wait_for -a "port=389 host=${IdmNode1.PrivateIp}"
+              - ansible localhost -m wait_for -a "path=/etc/origin/master/ipa-ca.crt timeout=600"
+              - 'ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml ; curl -X PUT -H "Content-Type:" --data-binary "{ \"Status\" : \"SUCCESS\", \"Reason\": \"Configuration Complete\", \"UniqueId\": \"GuideNode\",\"Data\": \"OCP deployment has successfully finished\" }" "${WaitHandle}"'
+
               mounts:
               - [ /dev/xvdc, /var/lib/etcd, xfs, "defaults" ]
             - { RepoAccount: !Select [0, !Split [",", !Ref QwiklabId]], RepoBranch: !Select [1, !Split [",", !Ref QwiklabId]] }
@@ -1291,17 +1306,8 @@ Resources:
               - [ systemctl, daemon-reload ]
               - [ systemctl, enable, workshopper ]
               - [ systemctl, start, workshopper ]
-              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode1.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode2.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode3.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode4.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode5.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=22 host=${WorkerNode6.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=22 host=${InfraNode1.PrivateIp}"
-              - ansible localhost -m wait_for -a "port=389 host=${IdmNode1.PrivateIp}"
-              - ansible master -m wait_for -a "path=/etc/origin/master/ipa-ca.crt timeout=600"
               - ansible localhost -m wait_for -a "port=80 host=localhost"
-              - 'curl -X PUT -H "Content-Type:" --data-binary "{ \"Status\" : \"SUCCESS\", \"Reason\": \"Configuration Complete\", \"UniqueId\": \"GuideNode\",\"Data\": \"GuideNode has reached all instances and generated lab guide\" }" "${WaitHandle}"'
+              - 'curl -X PUT -H "Content-Type:" --data-binary "{ \"Status\" : \"SUCCESS\", \"Reason\": \"Configuration Complete\", \"UniqueId\": \"GuideNode\",\"Data\": \"GuideNode has generated lab guide\" }" "${WaitHandle}"'
             - { RepoAccount: !Select [0, !Split [",", !Ref QwiklabId]], RepoBranch: !Select [1, !Split [",", !Ref QwiklabId]] }
 
   WorkerNode1:
