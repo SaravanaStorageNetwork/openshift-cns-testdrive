@@ -47,11 +47,12 @@ Parameters:
       - t2.medium
     ConstraintDescription: Must be a valid EC2 instance type.
 
-  GuideInstanceType:
+ SupportInstanceType:
     Type: String
-    Default: t2.small
+    Default: t2.medium
     AllowedValues:
       - t2.small
+      - t2.medium
     ConstraintDescription: Must be a valid EC2 instance type.
 
   KeyName:
@@ -1277,7 +1278,7 @@ Resources:
         - Ref: AWS::Region
         - ami
       InstanceType:
-        Ref: GuideInstanceType
+        Ref: SupportInstanceType
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref SupportNodeNetworkInterface
           DeviceIndex: '0'
