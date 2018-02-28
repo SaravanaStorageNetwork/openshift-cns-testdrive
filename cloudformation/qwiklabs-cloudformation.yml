@@ -47,7 +47,7 @@ Parameters:
       - t2.medium
     ConstraintDescription: Must be a valid EC2 instance type.
 
- SupportInstanceType:
+  SupportInstanceType:
     Type: String
     Default: t2.medium
     AllowedValues:
